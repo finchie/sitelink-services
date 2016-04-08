@@ -69,6 +69,8 @@ public class SiteServlet extends HttpServlet {
 			}
 			response.getWriter().append("total sites: " + sites.size() + "\n\n");
 		}
+		
+		request.getServletContext().setAttribute("sites", sites);
 	}
 	
 	private String fetchSites(int pageSize, int pageNumber) throws IOException {
