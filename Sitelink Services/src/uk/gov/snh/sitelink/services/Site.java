@@ -8,23 +8,23 @@ public class Site {
 	
 	public String name;
 	
-	public String designation;
+	public Designation designation;
 	
-	public String status;
+	public Status status;
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
 		this.id = Integer.parseInt(idString);
 		this.name = linkHTML.substring(linkHTML.indexOf(">"), linkHTML.lastIndexOf("<"));
-		this.designation = designation;
-		this.status = status;
+		this.designation = Designation.get(designation);
+		this.status = Status.get(status);
 	}
 	
 	public Site(List<String> data) {
 		this.id = Integer.parseInt(data.get(0));
 		String linkHTML = data.get(1);
 		this.name = linkHTML.substring(linkHTML.indexOf(">") + 1, linkHTML.lastIndexOf("<"));
-		this.designation = data.get(2);
-		this.status = data.get(3);
+		this.designation = Designation.get(data.get(2));
+		this.status = Status.get(data.get(3));
 	}
 
 	@Override
