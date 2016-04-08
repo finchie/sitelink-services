@@ -51,11 +51,13 @@ public class SiteServlet extends HttpServlet {
 		int pageSize = DEFAULT_PAGESIZE;
 		
 		int pageCount = (TOTAL_COUNT / pageSize) + 1;
-		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-			String sitesJSON = fetchSites(pageSize, pageIndex);
 			
-			Moshi moshi = new Moshi.Builder().build();
-			JsonAdapter<SearchResult> jsonAdapter = moshi.adapter(SearchResult.class);
+		Moshi moshi = new Moshi.Builder().build();
+		JsonAdapter<SearchResult> jsonAdapter = moshi.adapter(SearchResult.class);
+
+		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+			
+			String sitesJSON = fetchSites(pageSize, pageIndex);
 
 			SearchResult result = jsonAdapter.fromJson(sitesJSON);
 			
