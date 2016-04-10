@@ -64,13 +64,20 @@ public class SiteServlet extends HttpServlet {
 			for (List<String> siteData : result.aaData) {
 				Site site = new Site(siteData);
 				sites.add(site);
-				
-				response.getWriter().append(site.toString() + "\n");
 			}
-			response.getWriter().append("total sites: " + sites.size() + "\n\n");
+			//response.getWriter().append("total sites: " + sites.size() + "\n\n");
 		}
 		
+		// store sites in application scope
 		request.getServletContext().setAttribute("sites", sites);
+		
+		// write sites json to response
+		JsonAdapter<SiteCollection> siteAdapter = moshi.adapter(SiteCollection.class);
+		SiteCollection siteCollection = new SiteCollection();
+		siteCollection.sites = sites;
+		String json = siteAdapter.toJson(siteCollection);
+		
+		response.getWriter().append(json);
 	}
 	
 	private String fetchSites(int pageSize, int pageNumber) throws IOException {
