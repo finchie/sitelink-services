@@ -31,8 +31,6 @@ public class SiteServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int DEFAULT_PAGESIZE = 100;
 	private static final int TOTAL_COUNT = 2135;
-	
-	private static Set<Site> sites;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -40,7 +38,6 @@ public class SiteServlet extends HttpServlet {
     public SiteServlet() {
         super();
         // TODO Auto-generated constructor stub
-        sites = new HashSet<Site>();
     }
 
 	/**
@@ -48,16 +45,39 @@ public class SiteServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		int pageSize = DEFAULT_PAGESIZE;
+		// decide whether to re-fetch sites
+	    if (request.getServletContext().getAttribute("sites") == null
+	            || "true".equals(request.getParameter("refresh"))) {
+	        
+	        try
+            {
+                // store sites in application scope
+                request.getServletContext().setAttribute("sites", fetchSites());
+            }
+            catch (IOException e)
+            {
+                response.sendError(500, "error fetching sites data: " + e.getMessage());
+                return;
+            }
+	    }
+				
+		// write sites JSON to response
+		String json = toJSON((Set<Site>)request.getServletContext().getAttribute("sites"));
 		
+		response.getWriter().append(json);
+	}
+	
+	private Set<Site> fetchSites() throws IOException {
+	    int pageSize = DEFAULT_PAGESIZE;		
 		int pageCount = (TOTAL_COUNT / pageSize) + 1;
+		Set<Site> sites = new HashSet<Site>();
 			
 		Moshi moshi = new Moshi.Builder().build();
 		JsonAdapter<SearchResult> jsonAdapter = moshi.adapter(SearchResult.class);
 
 		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
 			
-			String sitesJSON = fetchSites(pageSize, pageIndex);
+			String sitesJSON = fetchSitesJSON(pageSize, pageIndex);
 
 			SearchResult result = jsonAdapter.fromJson(sitesJSON);
 			
@@ -65,22 +85,12 @@ public class SiteServlet extends HttpServlet {
 				Site site = new Site(siteData);
 				sites.add(site);
 			}
-			//response.getWriter().append("total sites: " + sites.size() + "\n\n");
 		}
 		
-		// store sites in application scope
-		request.getServletContext().setAttribute("sites", sites);
-		
-		// write sites json to response
-		JsonAdapter<SiteCollection> siteAdapter = moshi.adapter(SiteCollection.class);
-		SiteCollection siteCollection = new SiteCollection();
-		siteCollection.sites = sites;
-		String json = siteAdapter.toJson(siteCollection);
-		
-		response.getWriter().append(json);
+		return sites;
 	}
 	
-	private String fetchSites(int pageSize, int pageNumber) throws IOException {
+	private String fetchSitesJSON(int pageSize, int pageNumber) throws IOException {
 		// build parameters
 		String params = "sEcho=7&iColumns=4&sColumns=&iDisplayStart=" + (pageNumber * pageSize) + "&iDisplayLength=" + pageSize + "&sNames=%252C%252C%252C&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&iSortingCols=1&iSortCol_0=1&sSortDir_0=asc&sSearch0=&sSearch1=&sSearch2=";
 		
@@ -97,4 +107,11 @@ public class SiteServlet extends HttpServlet {
 		return resp.body().string().trim();
 	}
 
+	private String toJSON(Set<Site> sites) {
+	    Moshi moshi = new Moshi.Builder().build();
+		JsonAdapter<SiteCollection> siteAdapter = moshi.adapter(SiteCollection.class);
+		SiteCollection siteCollection = new SiteCollection();
+		siteCollection.sites = sites;
+		return siteAdapter.toJson(siteCollection);
+	}
 }
