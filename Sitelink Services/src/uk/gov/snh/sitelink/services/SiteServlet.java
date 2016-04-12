@@ -110,8 +110,7 @@ public class SiteServlet extends HttpServlet {
 	private String toJSON(Set<Site> sites) {
 	    Moshi moshi = new Moshi.Builder().build();
 		JsonAdapter<SiteCollection> siteAdapter = moshi.adapter(SiteCollection.class);
-		SiteCollection siteCollection = new SiteCollection();
-		siteCollection.sites = sites;
+		SiteCollection siteCollection = new SiteCollection(sites);
 		return siteAdapter.toJson(siteCollection);
 	}
 }
