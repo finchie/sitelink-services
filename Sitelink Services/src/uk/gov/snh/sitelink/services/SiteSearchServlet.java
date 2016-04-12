@@ -19,15 +19,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Servlet implementation class SiteServlet
+ * Servlet implementation class SiteSearchServlet
  */
 @WebServlet(
 		description = "searches for sites on Sitelink", 
 		urlPatterns = { 
-				"/SiteServlet", 
+				"/SiteSearchServlet", 
 				"/sites"
 		})
-public class SiteServlet extends HttpServlet {
+public class SiteSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int DEFAULT_PAGESIZE = 100;
 	private static final int TOTAL_COUNT = 2135;
@@ -35,7 +35,7 @@ public class SiteServlet extends HttpServlet {
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public SiteServlet() {
+    public SiteSearchServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
