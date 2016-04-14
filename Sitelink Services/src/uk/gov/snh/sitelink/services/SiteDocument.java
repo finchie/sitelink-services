@@ -2,6 +2,8 @@ package uk.gov.snh.sitelink.services;
 
 public class SiteDocument {
 	
+	public final static String BASE_URL = "http://gateway.snh.gov.uk/sitelink/";
+	
 	public String name;
 	
 	public int fileSize;

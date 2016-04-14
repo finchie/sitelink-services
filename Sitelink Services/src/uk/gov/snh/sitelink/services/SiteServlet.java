@@ -1,7 +1,7 @@
 package uk.gov.snh.sitelink.services;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -51,61 +51,54 @@ public class SiteServlet extends HttpServlet {
 			return;
 		}
 		
-		@SuppressWarnings("unchecked")
-		Map<Integer, Site> sites = (Map<Integer, Site>) request.getServletContext().getAttribute("sites");
+		Document doc = Jsoup
+						.connect("http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=" + siteId)
+						.timeout(60*1000)
+						.get();
+		Elements summaryCells = doc.select("#site_table td");
 		
-		if (sites == null) {
-			response.sendError(500, "site index not built\n GET /sites to build index");
-			return;
-		}
-				
-		Site site = sites.get(siteId);
+		Site site = new Site();
+		site.id = siteId;
+		site.name = summaryCells.get(1).text();
+		site.leadSNHArea = summaryCells.get(2).text();
+		site.designation = Designation.get(summaryCells.get(3).text());
 		
-		if (site == null) {
-			response.sendError(500, "invalid siteId: " + siteIdString);
-			return;
+		String documentedAreaString = summaryCells.get(4).text();
+		try {
+			site.documentedArea = Float.parseFloat(documentedAreaString);
+		} catch (NumberFormatException e) {
+			System.out.println("invalid documentedAreaString: " + documentedAreaString);
 		}
-		else {
-			Document doc = Jsoup
-							.connect("http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=" + siteId)
-							.timeout(60*1000)
-							.get();
-			Elements summaryCells = doc.select("#site_table td");
+
+		site.status = Status.get(summaryCells.get(5).text());
+		
+		site.mostRecentDesignatedDate = summaryCells.get(6).text();
+		
+		Elements docTableRows = doc.select("#documents_table tr"); 
+		// ignore header row
+		docTableRows.remove(0);
+		site.documents = new ArrayList<SiteDocument>();
+		
+		for (Element tr : docTableRows) {
 			
-			site.leadSNHArea = summaryCells.get(2).text();
-			
-			String documentedAreaString = summaryCells.get(4).text();
-			try {
-				site.documentedArea = Float.parseFloat(documentedAreaString);
-			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("invalid documentedAreaString: " + documentedAreaString);
-			}
-			
-			site.mostRecentDesignatedDate = summaryCells.get(6).text();
-			
-			Elements docTableRows = doc.select("#documents_table tr");
-			Element docTableRow = docTableRows.get(1);
-			Element a = docTableRow.select("a").get(0);
+			Element a = tr.select("a").get(0);
 			String docName = a.text().trim();
 			String url = a.attr("href");
 			if (url.contains(";jsessionid")) {
 				url = url.substring(0, url.indexOf(";")) + url.substring(url.indexOf("?"));
 			}
-			String fileSizeString = docTableRow.select("td").get(1).text().replace("\u00a0", "").trim();
+			String fileSizeString = tr.select("td").get(1).text().replace("\u00a0", "").trim();
 			int fileSize = 0;
 			try {
 				fileSize = Integer.parseInt(fileSizeString);
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 				System.out.println("invalid fileSizeString: " + fileSizeString);
 			}
-			site.citation = new SiteDocument(docName, fileSize, url);
-			
-			response.getWriter().append(toJSON(site));
+			site.documents.add(new SiteDocument(docName, fileSize, url));
 		}
+		
+		response.setContentType("application/json");
+		response.getWriter().append(toJSON(site));
 		
 	}
 

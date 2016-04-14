@@ -18,8 +18,11 @@ public class Site {
 	
 	public String mostRecentDesignatedDate;
 	
-	public SiteDocument citation;
+	public List<SiteDocument> documents;
 	
+	public Site() {
+		
+	}
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
 		this.id = Integer.parseInt(idString);
