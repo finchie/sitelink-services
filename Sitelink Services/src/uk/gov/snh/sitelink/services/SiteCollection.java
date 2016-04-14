@@ -1,12 +1,12 @@
 package uk.gov.snh.sitelink.services;
 
-import java.util.Set;
+import java.util.Map;
 
 public class SiteCollection {
 	
-	public Set<Site> sites;
+	public Map<Integer, Site> sites;
 	
-	public SiteCollection(Set<Site> sites) {
+	public SiteCollection(Map<Integer, Site> sites) {
 		this.sites = sites;
 	}
 

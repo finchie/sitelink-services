@@ -1,9 +1,10 @@
 package uk.gov.snh.sitelink.services;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -62,15 +63,17 @@ public class SiteSearchServlet extends HttpServlet {
 	    }
 				
 		// write sites JSON to response
-		String json = toJSON((Set<Site>)request.getServletContext().getAttribute("sites"));
-		
-		response.getWriter().append(json);
+	    @SuppressWarnings("unchecked")
+		Map<Integer, Site> sites = (Map<Integer, Site>) request.getServletContext().getAttribute("sites");
+	    String json = toJSON(sites);
+
+	    response.getWriter().append(json);
 	}
 	
-	private Set<Site> fetchSites() throws IOException {
+	private Map<Integer, Site> fetchSites() throws IOException {
 	    int pageSize = DEFAULT_PAGESIZE;		
 		int pageCount = (TOTAL_COUNT / pageSize) + 1;
-		Set<Site> sites = new HashSet<Site>();
+		Map<Integer, Site> sites = new HashMap<Integer, Site>();
 			
 		Moshi moshi = new Moshi.Builder().build();
 		JsonAdapter<SearchResult> jsonAdapter = moshi.adapter(SearchResult.class);
@@ -83,7 +86,7 @@ public class SiteSearchServlet extends HttpServlet {
 			
 			for (List<String> siteData : result.aaData) {
 				Site site = new Site(siteData);
-				sites.add(site);
+				sites.put(site.id, site);
 			}
 		}
 		
@@ -95,7 +98,11 @@ public class SiteSearchServlet extends HttpServlet {
 		String params = "sEcho=7&iColumns=4&sColumns=&iDisplayStart=" + (pageNumber * pageSize) + "&iDisplayLength=" + pageSize + "&sNames=%252C%252C%252C&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&iSortingCols=1&iSortCol_0=1&sSortDir_0=asc&sSearch0=&sSearch1=&sSearch2=";
 		
 		// fetch sites from sitelink
-		OkHttpClient client = new OkHttpClient();
+		OkHttpClient client = new OkHttpClient.Builder()
+		          .connectTimeout(60, TimeUnit.SECONDS)
+		          .writeTimeout(60, TimeUnit.SECONDS)
+		          .readTimeout(60, TimeUnit.SECONDS)
+		          .build();
 		Request req = new Request.Builder()
 		  .url("http://gateway.snh.gov.uk/sitelink/datatab.jsp?" + params)
 		  .get()
@@ -107,7 +114,7 @@ public class SiteSearchServlet extends HttpServlet {
 		return resp.body().string().trim();
 	}
 
-	private String toJSON(Set<Site> sites) {
+	private String toJSON(Map<Integer, Site> sites) {
 	    Moshi moshi = new Moshi.Builder().build();
 		JsonAdapter<SiteCollection> siteAdapter = moshi.adapter(SiteCollection.class);
 		SiteCollection siteCollection = new SiteCollection(sites);

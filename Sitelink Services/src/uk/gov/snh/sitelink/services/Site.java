@@ -12,6 +12,15 @@ public class Site {
 	
 	public Status status;
 	
+	public String leadSNHArea;
+	
+	public float documentedArea;
+	
+	public String mostRecentDesignatedDate;
+	
+	public SiteDocument citation;
+	
+	
 	public Site(String idString, String linkHTML, String designation, String status) {
 		this.id = Integer.parseInt(idString);
 		this.name = linkHTML.substring(linkHTML.indexOf(">"), linkHTML.lastIndexOf("<"));

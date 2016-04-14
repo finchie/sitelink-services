@@ -1,6 +1,7 @@
 package uk.gov.snh.sitelink.services;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,7 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 /**
  * Servlet implementation class SiteServlet
@@ -46,22 +51,68 @@ public class SiteServlet extends HttpServlet {
 			return;
 		}
 		
-		Document doc = Jsoup.connect("http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=" + siteId).get();
-		Elements summaryCells = doc.select("#site_table td");
+		@SuppressWarnings("unchecked")
+		Map<Integer, Site> sites = (Map<Integer, Site>) request.getServletContext().getAttribute("sites");
 		
-		String leadSNHArea = summaryCells.get(2).text();
-		String documentedAreaString = summaryCells.get(4).text();
-		float documentedArea = 0;
-		try {
-			documentedArea = Float.parseFloat(documentedAreaString);
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("invalid documentedAreaString: " + documentedAreaString);
+		if (sites == null) {
+			response.sendError(500, "site index not built\n GET /sites to build index");
+			return;
+		}
+				
+		Site site = sites.get(siteId);
+		
+		if (site == null) {
+			response.sendError(500, "invalid siteId: " + siteIdString);
+			return;
+		}
+		else {
+			Document doc = Jsoup
+							.connect("http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=" + siteId)
+							.timeout(60*1000)
+							.get();
+			Elements summaryCells = doc.select("#site_table td");
+			
+			site.leadSNHArea = summaryCells.get(2).text();
+			
+			String documentedAreaString = summaryCells.get(4).text();
+			try {
+				site.documentedArea = Float.parseFloat(documentedAreaString);
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("invalid documentedAreaString: " + documentedAreaString);
+			}
+			
+			site.mostRecentDesignatedDate = summaryCells.get(6).text();
+			
+			Elements docTableRows = doc.select("#documents_table tr");
+			Element docTableRow = docTableRows.get(1);
+			Element a = docTableRow.select("a").get(0);
+			String docName = a.text().trim();
+			String url = a.attr("href");
+			if (url.contains(";jsessionid")) {
+				url = url.substring(0, url.indexOf(";")) + url.substring(url.indexOf("?"));
+			}
+			String fileSizeString = docTableRow.select("td").get(1).text().replace("\u00a0", "").trim();
+			int fileSize = 0;
+			try {
+				fileSize = Integer.parseInt(fileSizeString);
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("invalid fileSizeString: " + fileSizeString);
+			}
+			site.citation = new SiteDocument(docName, fileSize, url);
+			
+			response.getWriter().append(toJSON(site));
 		}
 		
-		response.getWriter().append("leadSNHArea: " + leadSNHArea + "\n");
-		response.getWriter().append("documentedArea: " + documentedArea + "\n");
+	}
+
+	private String toJSON(Site site) {
+	    Moshi moshi = new Moshi.Builder().build();
+		JsonAdapter<Site> siteAdapter = moshi.adapter(Site.class);
+		return siteAdapter.toJson(site);
 	}
 
 }
