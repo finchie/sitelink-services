@@ -1,5 +1,6 @@
 package uk.gov.snh.sitelink.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Site {
@@ -20,8 +21,11 @@ public class Site {
 	
 	public List<SiteDocument> documents;
 	
+	public List<Feature> features;
+	
 	public Site() {
-		
+		this.documents = new ArrayList<SiteDocument>();
+		this.features = new ArrayList<Feature>();
 	}
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
@@ -29,6 +33,8 @@ public class Site {
 		this.name = linkHTML.substring(linkHTML.indexOf(">"), linkHTML.lastIndexOf("<"));
 		this.designation = Designation.get(designation);
 		this.status = Status.get(status);
+		this.documents = new ArrayList<SiteDocument>();
+		this.features = new ArrayList<Feature>();
 	}
 	
 	public Site(List<String> data) {
@@ -37,6 +43,8 @@ public class Site {
 		this.name = linkHTML.substring(linkHTML.indexOf(">") + 1, linkHTML.lastIndexOf("<"));
 		this.designation = Designation.get(data.get(2));
 		this.status = Status.get(data.get(3));
+		this.documents = new ArrayList<SiteDocument>();
+		this.features = new ArrayList<Feature>();
 	}
 
 	@Override

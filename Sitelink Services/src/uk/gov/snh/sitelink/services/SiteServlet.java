@@ -74,10 +74,10 @@ public class SiteServlet extends HttpServlet {
 		
 		site.mostRecentDesignatedDate = summaryCells.get(6).text();
 		
+		// documents
 		Elements docTableRows = doc.select("#documents_table tr"); 
 		// ignore header row
 		docTableRows.remove(0);
-		site.documents = new ArrayList<SiteDocument>();
 		
 		for (Element tr : docTableRows) {
 			
@@ -95,6 +95,18 @@ public class SiteServlet extends HttpServlet {
 				System.out.println("invalid fileSizeString: " + fileSizeString);
 			}
 			site.documents.add(new SiteDocument(docName, fileSize, url));
+		}
+		
+		// features
+		Elements featureTableRows = doc.select("#features_table tbody tr");
+		for (Element tr : featureTableRows) {
+			Elements tds = tr.select("td");
+			String name = tds.get(0).text().replace("\u00a0", "").trim();
+			String category = tds.get(1).text().replace("\u00a0", "").trim();
+			String latestAssessedCondition = tds.get(2).text().replace("\u00a0", "").trim();
+			String summaryCondition = tds.get(3).text().replace("\u00a0", "").trim();
+			String lastVisitDate = tds.get(4).text().replace("\u00a0", "").trim();
+			site.features.add(new Feature(name, category, latestAssessedCondition, summaryCondition, lastVisitDate));
 		}
 		
 		response.setContentType("application/json");
