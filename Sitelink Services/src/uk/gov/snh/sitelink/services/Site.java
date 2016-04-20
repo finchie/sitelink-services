@@ -23,9 +23,12 @@ public class Site {
 	
 	public List<Feature> features;
 	
+	public List<Pressure> pressures;
+	
 	public Site() {
 		this.documents = new ArrayList<SiteDocument>();
 		this.features = new ArrayList<Feature>();
+		this.pressures = new ArrayList<Pressure>();
 	}
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
@@ -35,6 +38,7 @@ public class Site {
 		this.status = Status.get(status);
 		this.documents = new ArrayList<SiteDocument>();
 		this.features = new ArrayList<Feature>();
+		this.pressures = new ArrayList<Pressure>();
 	}
 	
 	public Site(List<String> data) {
@@ -45,6 +49,7 @@ public class Site {
 		this.status = Status.get(data.get(3));
 		this.documents = new ArrayList<SiteDocument>();
 		this.features = new ArrayList<Feature>();
+		this.pressures = new ArrayList<Pressure>();
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package uk.gov.snh.sitelink.services;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -107,6 +106,22 @@ public class SiteServlet extends HttpServlet {
 			String summaryCondition = tds.get(3).text().replace("\u00a0", "").trim();
 			String lastVisitDate = tds.get(4).text().replace("\u00a0", "").trim();
 			site.features.add(new Feature(name, category, latestAssessedCondition, summaryCondition, lastVisitDate));
+		}
+		
+		// pressures
+		Elements pressureTableRows = doc.select("#featurePressures_table tbody tr");
+		for (Element tr : pressureTableRows) {
+			Elements tds = tr.select("td");
+			if ( "No negative pressures".equals(tds.get(1).text().replace("\u00a0", "").trim()) ) {
+				// skip feature
+			}
+			else {				
+				String feature = tr.select("td").get(0).text().replace("\u00a0", "").trim();
+				String pressure = tds.get(1).text().replace("\u00a0", "").trim();
+				String recordedAs = tds.get(2).text().replace("\u00a0", "").trim();
+				String keywords = tds.get(3).text().replace("\u00a0", "").trim();
+				site.pressures.add(new Pressure(feature, pressure, recordedAs, keywords));
+			}
 		}
 		
 		response.setContentType("application/json");
