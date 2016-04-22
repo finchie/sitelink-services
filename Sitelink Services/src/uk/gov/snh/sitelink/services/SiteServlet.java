@@ -124,6 +124,38 @@ public class SiteServlet extends HttpServlet {
 			}
 		}
 		
+		// agreements
+		Elements agreementTableRows = doc.select("#agreements_table tbody tr");
+		for (Element tr : agreementTableRows) {
+			Elements tds = tr.select("td");
+			String caseCodeString = tr.select("td").get(0).text().replace("\u00a0", "").trim();
+			int caseCode = 0;
+			try {
+				caseCode = Integer.parseInt(caseCodeString);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+			String caseAreaString = tds.get(1).text().replace("\u00a0", "").trim();
+			float caseArea = 0;
+			try {
+				caseArea = Float.parseFloat(caseAreaString);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+			String type = tds.get(2).text().replace("\u00a0", "").trim();
+			String propertyName = tds.get(3).text().replace("\u00a0", "").trim();
+			String managementScheme = tds.get(4).text().replace("\u00a0", "").trim();
+			String termString = tds.get(5).text().replace("\u00a0", "").trim();
+			int term = 0;
+			try {
+				term = Integer.parseInt(termString);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+			String expiryDate = tds.get(6).text().replace("\u00a0", "").trim();
+			site.agreements.add(new Agreement(caseCode, caseArea, type, propertyName, managementScheme, term, expiryDate));
+		}
+		
 		response.setContentType("application/json");
 		response.getWriter().append(toJSON(site));
 		
