@@ -27,11 +27,14 @@ public class Site {
 	
 	public List<Agreement> agreements;
 	
+	public List<Casework> cases;
+	
 	public Site() {
 		this.documents = new ArrayList<SiteDocument>();
 		this.features = new ArrayList<Feature>();
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
+		this.cases = new ArrayList<Casework>();
 	}
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
@@ -43,6 +46,7 @@ public class Site {
 		this.features = new ArrayList<Feature>();
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
+		this.cases = new ArrayList<Casework>();
 	}
 	
 	public Site(List<String> data) {
@@ -55,6 +59,7 @@ public class Site {
 		this.features = new ArrayList<Feature>();
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
+		this.cases = new ArrayList<Casework>();
 	}
 
 	@Override

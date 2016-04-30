@@ -156,6 +156,17 @@ public class SiteServlet extends HttpServlet {
 			site.agreements.add(new Agreement(caseCode, caseArea, type, propertyName, managementScheme, term, expiryDate));
 		}
 		
+		// casework
+		Elements caseworkTableRows = doc.select("#caseworks_table tbody tr");
+		for (Element tr : caseworkTableRows) {
+			Elements tds = tr.select("td");
+			String caseCode = tds.get(0).text().replace("\u00a0", "").trim();
+			String consultationType = tds.get(1).text().replace("\u00a0", "").trim();
+			String receivedDate = tds.get(2).text().replace("\u00a0", "").trim();
+			String resp = tds.get(3).text().replace("\u00a0", "").trim();
+			site.cases.add(new Casework(caseCode, consultationType, receivedDate, resp));
+		}
+		
 		response.setContentType("application/json");
 		response.getWriter().append(toJSON(site));
 		
