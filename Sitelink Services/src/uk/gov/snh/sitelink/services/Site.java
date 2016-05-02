@@ -33,12 +33,15 @@ public class Site {
 	
 	public String mapURL;
 	
+	public List<Link> links;
+	
 	public Site() {
 		this.documents = new ArrayList<SiteDocument>();
 		this.features = new ArrayList<Feature>();
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
 		this.cases = new ArrayList<Casework>();
+		this.links = new ArrayList<Link>();
 	}
 	
 	public Site(String idString, String linkHTML, String designation, String status) {
@@ -51,6 +54,7 @@ public class Site {
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
 		this.cases = new ArrayList<Casework>();
+		this.links = new ArrayList<Link>();
 	}
 	
 	public Site(List<String> data) {
@@ -64,6 +68,7 @@ public class Site {
 		this.pressures = new ArrayList<Pressure>();
 		this.agreements = new ArrayList<Agreement>();
 		this.cases = new ArrayList<Casework>();
+		this.links = new ArrayList<Link>();
 	}
 
 	@Override

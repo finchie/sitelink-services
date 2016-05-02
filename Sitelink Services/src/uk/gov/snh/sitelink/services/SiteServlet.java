@@ -167,6 +167,14 @@ public class SiteServlet extends HttpServlet {
 			site.cases.add(new Casework(caseCode, consultationType, receivedDate, resp));
 		}
 		
+		// links
+		Elements links = doc.select("a.rlink");
+		for (Element link : links) {
+			String url = link.attr("href");
+			String text = link.text().replace("\u00a0", "").trim();
+			site.links.add(new Link(url, text));
+		}
+		
 		// map
 		site.mapURL = Site.BASE_URL + "sitemap.jsp?pa_code=" + siteId + "&desig_code=" + site.designation.name();
 		
