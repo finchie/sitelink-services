@@ -93,7 +93,7 @@ public class SiteServlet extends HttpServlet {
 			} catch (NumberFormatException e) {
 				System.out.println("invalid fileSizeString: " + fileSizeString);
 			}
-			site.documents.add(new SiteDocument(docName, fileSize, url));
+			site.documents.add(new SiteDocument(docName, fileSize, Site.BASE_URL + url));
 		}
 		
 		// features
@@ -166,6 +166,9 @@ public class SiteServlet extends HttpServlet {
 			String resp = tds.get(3).text().replace("\u00a0", "").trim();
 			site.cases.add(new Casework(caseCode, consultationType, receivedDate, resp));
 		}
+		
+		// map
+		site.mapURL = Site.BASE_URL + "sitemap.jsp?pa_code=" + siteId + "&desig_code=" + site.designation.name();
 		
 		response.setContentType("application/json");
 		response.getWriter().append(toJSON(site));

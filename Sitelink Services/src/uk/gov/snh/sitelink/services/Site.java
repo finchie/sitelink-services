@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Site {
+	
+	public static final String BASE_URL = "http://gateway.snh.gov.uk/sitelink/";
 
 	public int id;
 	
@@ -28,6 +30,8 @@ public class Site {
 	public List<Agreement> agreements;
 	
 	public List<Casework> cases;
+	
+	public String mapURL;
 	
 	public Site() {
 		this.documents = new ArrayList<SiteDocument>();
